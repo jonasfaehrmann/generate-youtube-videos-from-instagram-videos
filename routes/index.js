@@ -1,7 +1,7 @@
 let express = require("express");
 let router = express.Router();
 let {google} = require('googleapis');
-let authYoutube = require("../helper/authYoutubeYoutube");
+let authYoutube = require("../helper/authYoutube");
 
 router.get("/upload", function(req, res) {
 	res.render("dashboard/index");
