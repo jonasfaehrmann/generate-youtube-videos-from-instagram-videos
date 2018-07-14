@@ -3,14 +3,14 @@ let save = require('instagram-save');
 let path = require('path');
 let fs = require('fs');
 let readline = require('readline');
+let concat = require('ffmpeg-concat');
 
 /**
  * Cron job running every second weekday
  */
 //1,3,5,7
-
 function startCron(){
-  cron.schedule('10 * * * * *', function(){
+  //cron.schedule('* 3 * * * *', function(){
       
     let data = [];
 
@@ -22,17 +22,48 @@ function startCron(){
       data.push(line);
     }).on('close', function() {
       console.log(data);
-      processArray(data);
+      processArray(data, mergeVideos);
     });
-  });
+  //});
 }
 
-async function processArray(array){
+/**
+ * Process array async in parallel
+ * @param {*} array 
+ */
+async function processArray(array, callback){
   for(const item of array){
     await save(item, path.join(__dirname, '../videos'));
   }
+  callback();
 }
 
+/**
+ * Merge videos with ffmpeg library and put them into output folder
+ */
+function mergeVideos(){
+  
+  fs.readdir(path.join(__dirname, '../videos'), async function(err, items) {
+    
+    items.shift();
+
+    await concat({
+      output: path.join(__dirname, '../output/test.mp4'),
+      videos: items.map(i => path.join(__dirname,'../videos/') + i),
+      /*transition: {
+        name: 'directionalWipe',
+        duration: 100
+      }*/
+    });
+
+    console.log("Done");
+  });
+
+}
+
+/**
+ * catch unhandled promises
+ */
 process.on('unhandledRejection', (reason, promise) => {
   console.log('Unhandled Rejection at:', reason.stack || reason)
 })
