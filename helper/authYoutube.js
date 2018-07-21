@@ -2,24 +2,13 @@ var fs = require('fs');
 var readline = require('readline');
 var {google} = require('googleapis');
 var OAuth2 = google.auth.OAuth2;
+var path = require('path');
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/youtube-nodejs-quickstart.json
-var SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
-var TOKEN_DIR = '../credentials/';
+var SCOPES = ['https://www.googleapis.com/auth/youtube.force-ssl'];
+var TOKEN_DIR = path.join(__dirname, '../credentials/');
 var TOKEN_PATH = TOKEN_DIR + 'secret.json';
-
-let credentials = {};
-
-// Load client secrets from a local file.
-fs.readFile('./oauth2.keys.json', function processClientSecrets(err, content) {
-  if (err) {
-    console.log('Error loading client secret file: ' + err);
-    return;
-  }
-  // Authorize a client with the loaded credentials, then call the YouTube API.
-  credentials = JSON.parse(content);
-});
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -28,7 +17,7 @@ fs.readFile('./oauth2.keys.json', function processClientSecrets(err, content) {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(callback) {
+function authorize(credentials, callback) {
   var clientSecret = credentials.installed.client_secret;
   var clientId = credentials.installed.client_id;
   var redirectUrl = credentials.installed.redirect_uris[0];
@@ -37,7 +26,6 @@ function authorize(callback) {
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, function(err, token) {
     if (err) {
-      console.log("No stored token");
       getNewToken(oauth2Client, callback);
     } else {
       oauth2Client.credentials = JSON.parse(token);
@@ -96,6 +84,35 @@ function storeToken(token) {
     console.log('Token stored to ' + TOKEN_PATH);
   });
   console.log('Token stored to ' + TOKEN_PATH);
+}
+
+/**
+ * Lists the names and IDs of up to 10 files.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function getChannel(auth) {
+  var service = google.youtube('v3');
+  service.channels.list({
+    auth: auth,
+    part: 'snippet,contentDetails,statistics',
+    forUsername: 'GoogleDevelopers'
+  }, function(err, response) {
+    if (err) {
+      console.log('The API returned an error: ' + err);
+      return;
+    }
+    var channels = response.data.items;
+    if (channels.length == 0) {
+      console.log('No channel found.');
+    } else {
+      console.log('This channel\'s ID is %s. Its title is \'%s\', and ' +
+                  'it has %s views.',
+                  channels[0].id,
+                  channels[0].snippet.title,
+                  channels[0].statistics.viewCount);
+    }
+  });
 }
 
 module.exports = authorize;

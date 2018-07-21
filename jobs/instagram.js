@@ -45,15 +45,19 @@ function mergeVideos(){
   
   fs.readdir(path.join(__dirname, '../videos'), async function(err, items) {
     
-    items.shift();
+    //MAC OS fix: remove .DS_Store file name from list
+    if(items[0] === ".DS_Store"){
+      items.shift();
+    }
 
     await concat({
       output: path.join(__dirname, '../output/test.mp4'),
       videos: items.map(i => path.join(__dirname,'../videos/') + i),
-      /*transition: {
-        name: 'directionalWipe',
-        duration: 100
-      }*/
+      frameFormat: 'png',
+      transition: {
+        name: 'directionalwipe',
+        duration: 500
+      }
     });
 
     console.log("Done");

@@ -1,4 +1,8 @@
 # YTFame
 
 
-requires "brew install ffmpeg"
+requires 
+brew install ffmpeg
+
+run:
+node --max_old_space_size=4096 app.js
