@@ -3,13 +3,13 @@ let express = require("express"),
     bodyParser = require("body-parser"),
     methodOverride = require("method-override"),
     expressSanitizer = require("express-sanitizer"),
-    instaJob = require("./jobs/instagram"),
-    youtubeJob = require("./jobs/youtube");
+    instaJob = require("./jobs/instagramJob"),
+    youtubeJob = require("./jobs/youtubeJob");
 
 let route = require("./routes/index");
 
-//instaJob();
-youtubeJob();
+instaJob();
+//youtubeJob();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
